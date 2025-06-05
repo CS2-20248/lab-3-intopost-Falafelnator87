@@ -44,7 +44,7 @@ import java.util.Scanner;
  *  A B + C * D E - -<br>
  * <br>
  * @author RIT CS
- * @author YOUR NAME HERE
+ * @author Peter Zsenits
  */
 public class InToPost {
     /** The add operator */
@@ -124,9 +124,35 @@ public class InToPost {
      * @return a new queue of tokens (strings) in postfix form
      */
     private Queue<String> convert(List<String> tokens) {
-        // TODO
-        // YOUR IMPLEMENTATION HERE
-        return null;   // replace this
+        StackNode<String> opstack = new StackNode<>();
+        QueueNode<String> postfix = new QueueNode<>();
+
+        for (String token : tokens) {
+            if (token.matches("[a-zA-Z]+")) {
+                postfix.enqueue(token);
+            }
+            if (token.equals(OPEN_PAREN)) {
+                opstack.push(token);
+            }
+            if (token.equals(CLOSE_PAREN)) {
+                String cur = opstack.pop();
+                while (!cur.equals(OPEN_PAREN)) {
+                    postfix.enqueue(cur);
+                    cur = opstack.pop();
+                }
+            }
+            boolean isOperand = token.equals(MULTIPLY) || token.equals(DIVIDE) || token.equals(ADD) || token.equals(SUBTRACT);
+            if (isOperand) {
+                while (!opstack.empty() && greaterEqualPrecedence(opstack.top(), token)) {
+                    postfix.enqueue(opstack.pop());
+                }
+                opstack.push(token);
+            }
+        }
+        while (!opstack.empty()) {
+            postfix.enqueue(opstack.pop());
+        }
+        return postfix;
     }
 
     /**
